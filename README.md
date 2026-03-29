@@ -1,204 +1,165 @@
-# 📊 Financial News Contradiction Analyzer
+# Financial News Contradiction Analyzer
 
 An end-to-end Streamlit application that detects, explains, and scores factual inconsistencies between two financial news articles.
 
-## 🚀 Overview
+## Overview
 
-The Financial News Contradiction Analyzer is designed to help analysts, researchers, and compliance teams compare multiple reports of the same financial event and uncover where they diverge.
+The Financial News Contradiction Analyzer helps analysts, researchers, and compliance teams compare multiple reports of the same financial event and systematically identify where they diverge.
 
-Instead of asking “Which article is correct?”, this tool answers:
+Rather than asking “Which article is correct?”, the system focuses on:
 
-> “Where do two credible sources disagree, and by how much?”
+> Where do two credible sources disagree, and by how much?
 
-It extracts structured claims from each article, aligns similar claims, and highlights contradictions with confidence scores and explanations.
+It extracts structured claims from each article, aligns related claims, and highlights contradictions with confidence scores and concise explanations.
 
-## ✨ Key Features
+## Key Features
 
-### 🔗 Multi-input support
-- Paste article URLs (via `newspaper3k`)
-- Upload PDFs (via `pdfplumber`)
+- **Flexible input options**
+  - Article URLs via `newspaper3k`
+  - PDF uploads via `pdfplumber`
+- **LLM-driven claim extraction**
+  - Extracts structured claims including:
+    - Entity
+    - Value
+    - Date
+    - Claim type (metric, date, quote)
+    - Source quote (exact supporting text)
+- **Intelligent claim alignment**
+  - Uses `rapidfuzz` and optional embeddings to match related claims
+- **Hybrid contradiction detection**
+  - Rule-based logic for numeric, date, and quote comparisons
+  - LLM fallback for ambiguous cases
+- **Interactive Streamlit dashboard**
+  - Side-by-side comparison of claims
+  - Classification: agree, conflict, unverifiable
+  - Confidence scores and explanations
+  - Overall reporting alignment score
+- **Export capabilities**
+  - JSON output
+  - PDF reports via `reportlab`
 
-### 🧠 LLM-powered claim extraction
-Extracts structured claims:
-- Entity
-- Value
-- Date
-- Claim type (metric, date, quote)
-- Source quote (exact supporting text)
-
-### 🔍 Smart claim alignment
-- Uses `rapidfuzz` (and optional embeddings) to match related claims across articles
-
-### ⚖️ Hybrid contradiction detection
-Rule-based logic for:
-- Numeric comparisons (handles million/billion/%/ranges)
-- Date comparisons
-- Quote similarity
-- LLM fallback for ambiguous cases
-
-### 📊 Interactive dashboard (Streamlit)
-- Side-by-side comparison
-- Color-coded claim cards:
-  - 🟢 **Agree**
-  - 🔴 **Conflict**
-  - 🟡 **Unverifiable**
-- Confidence scores
-- One-line explanations per comparison
-- Overall Reporting Alignment Score
-
-### 📄 Exportable outputs
-- JSON results
-- PDF summary reports (via `reportlab`)
-
-## 🧱 System Architecture
+## System Architecture
 
 ```text
 Input Layer
- ├── URL ingestion (newspaper3k)
- └── PDF ingestion (pdfplumber)
+├── URL ingestion (newspaper3k)
+└── PDF ingestion (pdfplumber)
 
 ↓
 Text Processing
 
 ↓
 Claim Extraction (LLM)
- └── Structured schema:
-     {entity, value, date, claim_type, source_quote}
+└── {entity, value, date, claim_type, source_quote}
 
 ↓
 Claim Alignment
- └── rapidfuzz similarity matching
+└── rapidfuzz similarity matching
 
 ↓
 Contradiction Detection (Hybrid)
- ├── Rule-based engine:
- │     ├── Numeric comparison
- │     ├── Date parsing
- │     └── Quote similarity
- └── LLM fallback (edge cases)
+├── Rule-based engine
+│   ├── Numeric comparison
+│   ├── Date parsing
+│   └── Quote similarity
+└── LLM fallback
 
 ↓
-Visualization Layer (Streamlit)
- ├── Claim cards
- ├── Conflict explanations
- └── Alignment score
+Visualization (Streamlit)
 
 ↓
-Export Layer
- ├── JSON
- └── PDF report
+Export (JSON, PDF)
 ```
 
-### 🧠 Core Insight
+## Core Insight
 
-In financial and legal journalism, truth is rarely binary.
+In financial and legal journalism, truth is often distributed across multiple credible accounts rather than contained within a single source.
 
-Different credible sources often report:
-- Slightly different numbers
+Different reports may present:
+- Slightly different numerical values
 - Varying timelines
-- Selective quotes
+- Selective or paraphrased quotes
 
-This system embraces that reality by focusing on:
-**Quantifying disagreement instead of labeling truth**
+This system quantifies and surfaces these differences to support better decision-making.
 
-## ⚙️ Hybrid Detection Strategy
+## Hybrid Detection Strategy
 
-### ✅ Rule-Based (Primary)
+### Rule-Based Detection (Primary)
 
-Used when structured comparison is possible:
+Applied when structured comparison is feasible.
 
 1. **Numeric Claims**
-   - Extract numbers from source_quote
-   - Normalize: Million / Billion, Percentages, Ranges (e.g., 13–16%)
-   - Compare with tolerance thresholds
+   - Extract values from `source_quote`
+   - Normalize units (million, billion, percentages, ranges)
+   - Compare using tolerance thresholds
 2. **Date Claims**
-   - Parse and normalize dates
-   - Compare: Exact match, Same period (e.g., quarter/year)
-3. **Quotes**
-   - Fuzzy matching (`rapidfuzz`, `difflib`)
-   - Determine: Same quote → Agree, Clearly different → Conflict
+   - Parse and standardize dates
+   - Compare exact matches or equivalent periods
+3. **Quote Claims**
+   - Use fuzzy matching (`rapidfuzz`, `difflib`)
+   - Classify as:
+     - Matching (agree)
+     - Distinct (conflict)
+     - Ambiguous (unverifiable)
 
-### 🤖 LLM Fallback
+### LLM Fallback
 
-Triggered when:
+Used only when:
 - Numeric parsing fails
-- Claims lack sufficient detail
-- Ambiguity remains after rule checks
+- Claims lack sufficient structure
+- The comparison remains ambiguous after rule-based checks
 
-## 🛠️ Tech Stack
+This hybrid approach improves accuracy while reducing unnecessary LLM usage.
 
-| Layer | Tools Used |
-|-------|------------|
-| Frontend UI | Streamlit |
-| Article Scraping | `newspaper3k` |
-| PDF Parsing | `pdfplumber` |
-| Claim Extraction | LLM API |
-| Matching Engine | `rapidfuzz` |
-| Reporting | `reportlab` |
-| Backend | Python |
+## Tech Stack
 
-## 📦 Installation
+- **Frontend:** Streamlit
+- **Scraping:** `newspaper3k`
+- **PDF Parsing:** `pdfplumber`
+- **Claim Extraction:** Ollama LLM
+- **Matching:** `rapidfuzz`
+- **Reporting:** `reportlab`
+- **Backend:** Python
+
+## Installation
 
 ```bash
 git clone https://github.com/your-username/financial-contradiction-analyzer.git
 cd financial-contradiction-analyzer
-
 pip install -r requirements.txt
 ```
 
-## ▶️ Usage
+## Usage
 
 ```bash
 streamlit run app.py
 ```
 
-Then:
-1. Paste two article URLs or upload PDFs
-2. Click **Analyze**
-3. Explore:
-   - Matched claims
-   - Highlighted contradictions
-   - Alignment score
+Steps:
+1. Provide two article URLs or upload PDF files
+2. Run the analysis
+3. Review aligned claims, contradictions, and the overall alignment score
 
-## 📊 Output Example
-
-- **Alignment Score:** 72%
-- **Conflicts Found:** 5
-- **Key Differences:**
-  - Revenue: $2.84B vs $2.48B
-  - Growth Rate: 14% vs 16%
-  - Timeline mismatch in earnings report
-
-## 📁 Project Structure
+## Project Structure
 
 ```text
-├── app.py                  # Streamlit UI
-├── ingestion/
-│   ├── scraper.py         # newspaper3k logic
-│   └── pdf_parser.py
-├── extraction/
-│   └── claim_extractor.py
-├── alignment/
-│   └── matcher.py
-├── detection/
-│   ├── numeric_parser.py
-│   ├── rule_engine.py
-│   └── llm_fallback.py
-├── utils/
-├── exports/
-│   └── pdf_generator.py
-└── requirements.txt
+app.py
+ingestion/
+  scraper.py
+  pdf_parser.py
+extraction/
+  claim_extractor.py
+alignment/
+  matcher.py
+detection/
+  numeric_parser.py
+  rule_engine.py
+  llm_fallback.py
+exports/
+  pdf_generator.py
+utils/
+requirements.txt
 ```
 
-## 🔮 Future Improvements
-
-- Embedding-based semantic alignment
-- Multi-article comparison (beyond 2 sources)
-- Real-time news monitoring
-- Domain-specific financial ontologies
-- Improved unit normalization (currencies, inflation adjustments)
-
-## 🤝 Contributing
-
-Contributions are welcome!
-Feel free to open issues or submit pull requests.
+---
+Contributions are welcome. Please open an issue or submit a pull request.
