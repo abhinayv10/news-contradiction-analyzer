@@ -1,6 +1,14 @@
 # Financial News Contradiction Analyzer
 
-Production-oriented prototype: ingest two financial news articles (URLs or PDFs), extract structured claims with an LLM, align claims with **rapidfuzz** (and optional embeddings), classify agreement vs contradiction, and review results in **Streamlit**. Download a **reportlab** PDF or JSON export.
+A sleek, production-oriented prototype designed to ingest two financial news articles (URLs or PDFs), extract structured claims using an LLM, align claims with **rapidfuzz** (and optional embeddings), classify agreement vs. contradiction, and review the results in a modern, polished **Streamlit** dashboard. Results can be exported as a **reportlab** PDF or JSON.
+
+## Features
+
+- **Polished User Interface:** Modern, premium Streamlit design for an enhanced user experience.
+- **Multi-format Support:** Ingest articles via URLs or direct PDF uploads.
+- **LLM-Powered Extraction:** Structured claim extraction and advanced agreement/contradiction classification.
+- **Robust Alignment:** Rapidfuzz and optional embeddings used for high-accuracy claim matching.
+- **Detailed Export:** Downloadable PDF reports and JSON payloads.
 
 ## Setup
 
