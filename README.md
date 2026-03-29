@@ -1,80 +1,204 @@
-# Financial News Contradiction Analyzer
+# 📊 Financial News Contradiction Analyzer
 
-A sleek, production-oriented prototype designed to ingest two financial news articles (URLs or PDFs), extract structured claims using an LLM, align claims with **rapidfuzz** (and optional embeddings), classify agreement vs. contradiction, and review the results in a modern, polished **Streamlit** dashboard. Results can be exported as a **reportlab** PDF or JSON.
+An end-to-end Streamlit application that detects, explains, and scores factual inconsistencies between two financial news articles.
 
-## Features
+## 🚀 Overview
 
-- **Polished User Interface:** Modern, premium Streamlit design for an enhanced user experience.
-- **Multi-format Support:** Ingest articles via URLs or direct PDF uploads.
-- **LLM-Powered Extraction:** Structured claim extraction and advanced agreement/contradiction classification.
-- **Robust Alignment:** Rapidfuzz and optional embeddings used for high-accuracy claim matching.
-- **Detailed Export:** Downloadable PDF reports and JSON payloads.
+The Financial News Contradiction Analyzer is designed to help analysts, researchers, and compliance teams compare multiple reports of the same financial event and uncover where they diverge.
 
-## Setup
+Instead of asking “Which article is correct?”, this tool answers:
 
-```bash
-cd financial-news-contradiction-analyzer
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-copy .env.example .env
+> “Where do two credible sources disagree, and by how much?”
+
+It extracts structured claims from each article, aligns similar claims, and highlights contradictions with confidence scores and explanations.
+
+## ✨ Key Features
+
+### 🔗 Multi-input support
+- Paste article URLs (via `newspaper3k`)
+- Upload PDFs (via `pdfplumber`)
+
+### 🧠 LLM-powered claim extraction
+Extracts structured claims:
+- Entity
+- Value
+- Date
+- Claim type (metric, date, quote)
+- Source quote (exact supporting text)
+
+### 🔍 Smart claim alignment
+- Uses `rapidfuzz` (and optional embeddings) to match related claims across articles
+
+### ⚖️ Hybrid contradiction detection
+Rule-based logic for:
+- Numeric comparisons (handles million/billion/%/ranges)
+- Date comparisons
+- Quote similarity
+- LLM fallback for ambiguous cases
+
+### 📊 Interactive dashboard (Streamlit)
+- Side-by-side comparison
+- Color-coded claim cards:
+  - 🟢 **Agree**
+  - 🔴 **Conflict**
+  - 🟡 **Unverifiable**
+- Confidence scores
+- One-line explanations per comparison
+- Overall Reporting Alignment Score
+
+### 📄 Exportable outputs
+- JSON results
+- PDF summary reports (via `reportlab`)
+
+## 🧱 System Architecture
+
+```text
+Input Layer
+ ├── URL ingestion (newspaper3k)
+ └── PDF ingestion (pdfplumber)
+
+↓
+Text Processing
+
+↓
+Claim Extraction (LLM)
+ └── Structured schema:
+     {entity, value, date, claim_type, source_quote}
+
+↓
+Claim Alignment
+ └── rapidfuzz similarity matching
+
+↓
+Contradiction Detection (Hybrid)
+ ├── Rule-based engine:
+ │     ├── Numeric comparison
+ │     ├── Date parsing
+ │     └── Quote similarity
+ └── LLM fallback (edge cases)
+
+↓
+Visualization Layer (Streamlit)
+ ├── Claim cards
+ ├── Conflict explanations
+ └── Alignment score
+
+↓
+Export Layer
+ ├── JSON
+ └── PDF report
 ```
 
-Edit `.env` and set `LLM_API_KEY` and optionally `LLM_BASE_URL` / `LLM_MODEL` for any OpenAI-compatible API.
+### 🧠 Core Insight
 
-## Run the app
+In financial and legal journalism, truth is rarely binary.
+
+Different credible sources often report:
+- Slightly different numbers
+- Varying timelines
+- Selective quotes
+
+This system embraces that reality by focusing on:
+**Quantifying disagreement instead of labeling truth**
+
+## ⚙️ Hybrid Detection Strategy
+
+### ✅ Rule-Based (Primary)
+
+Used when structured comparison is possible:
+
+1. **Numeric Claims**
+   - Extract numbers from source_quote
+   - Normalize: Million / Billion, Percentages, Ranges (e.g., 13–16%)
+   - Compare with tolerance thresholds
+2. **Date Claims**
+   - Parse and normalize dates
+   - Compare: Exact match, Same period (e.g., quarter/year)
+3. **Quotes**
+   - Fuzzy matching (`rapidfuzz`, `difflib`)
+   - Determine: Same quote → Agree, Clearly different → Conflict
+
+### 🤖 LLM Fallback
+
+Triggered when:
+- Numeric parsing fails
+- Claims lack sufficient detail
+- Ambiguity remains after rule checks
+
+## 🛠️ Tech Stack
+
+| Layer | Tools Used |
+|-------|------------|
+| Frontend UI | Streamlit |
+| Article Scraping | `newspaper3k` |
+| PDF Parsing | `pdfplumber` |
+| Claim Extraction | LLM API |
+| Matching Engine | `rapidfuzz` |
+| Reporting | `reportlab` |
+| Backend | Python |
+
+## 📦 Installation
+
+```bash
+git clone https://github.com/your-username/financial-contradiction-analyzer.git
+cd financial-contradiction-analyzer
+
+pip install -r requirements.txt
+```
+
+## ▶️ Usage
 
 ```bash
 streamlit run app.py
 ```
 
-## Example run (two URLs)
+Then:
+1. Paste two article URLs or upload PDFs
+2. Click **Analyze**
+3. Explore:
+   - Matched claims
+   - Highlighted contradictions
+   - Alignment score
 
-Use two articles that cover the **same** corporate event (earnings, M&A, guidance) so claims overlap.
+## 📊 Output Example
 
-1. Start the app and choose **URLs**.
-2. Paste two finance URLs (Reuters, Bloomberg, WSJ, etc.) that discuss the same story.
-3. Click **Analyze**.
+- **Alignment Score:** 72%
+- **Conflicts Found:** 5
+- **Key Differences:**
+  - Revenue: $2.84B vs $2.48B
+  - Growth Rate: 14% vs 16%
+  - Timeline mismatch in earnings report
 
-**Sample pair (illustrative — replace with current live URLs):**
+## 📁 Project Structure
 
-- Article A: a Reuters piece on a company’s quarterly results  
-- Article B: a second outlet’s recap of the **same quarter** for the **same company**
+```text
+├── app.py                  # Streamlit UI
+├── ingestion/
+│   ├── scraper.py         # newspaper3k logic
+│   └── pdf_parser.py
+├── extraction/
+│   └── claim_extractor.py
+├── alignment/
+│   └── matcher.py
+├── detection/
+│   ├── numeric_parser.py
+│   ├── rule_engine.py
+│   └── llm_fallback.py
+├── utils/
+├── exports/
+│   └── pdf_generator.py
+└── requirements.txt
+```
 
-If outlets use different rounding (e.g. $5B vs $5.1B), the classifier should mark **agree** or **conflict** depending on tolerance; **unverifiable** appears when alignment is weak or facts are missing on one side.
+## 🔮 Future Improvements
 
-## Configuration
+- Embedding-based semantic alignment
+- Multi-article comparison (beyond 2 sources)
+- Real-time news monitoring
+- Domain-specific financial ontologies
+- Improved unit normalization (currencies, inflation adjustments)
 
-| Variable | Purpose |
-|----------|---------|
-| `LLM_API_KEY` | API key |
-| `LLM_BASE_URL` | OpenAI-compatible base (default OpenAI) |
-| `LLM_MODEL` | Chat model for extraction + classification |
-| `LLM_TEMPERATURE` | Use `0` for deterministic JSON |
-| `LLM_EMBEDDING_MODEL` | Optional; boosts alignment when set |
-| `DEMO_MODE` | If `true`, uses fast heuristic extraction + rules-only labeling (no LLM calls). |
-| `AMOUNT_REL_TOLERANCE` | Relative numeric tolerance for money/amount agreement. |
-| `PERCENT_ABS_TOLERANCE` | Absolute numeric tolerance for percent agreement (in percentage points). |
-| `CACHE_DIR` | LLM response cache (`.cache`); delete to invalidate |
-| `ALIGNMENT_MIN_SCORE` | Minimum fuzzy+embedding score (0–100) to pair claims |
-| `CLAIM_CHUNK_CHARS` | Max characters per LLM chunk |
+## 🤝 Contributing
 
-## Architecture
-
-| Module | Role |
-|--------|------|
-| `app.py` | Streamlit UI |
-| `ingestion.py` | `newspaper3k` URLs, `pdfplumber` PDFs, text normalize |
-| `claim_extractor.py` | Chunked LLM extraction, claim deduplication |
-| `aligner.py` | `rapidfuzz` + optional embeddings, one-to-one matching |
-| `classifier.py` | LLM labels: agree / conflict / unverifiable |
-| `scoring.py` | Counts and alignment score |
-| `report.py` | PDF download |
-| `diff_utils.py` | `difflib` similarity for UI |
-| `llm_client.py` | Configurable client + optional disk cache |
-| `prompts.py` | Prompt templates |
-
-## Notes
-
-- First run with **newspaper3k** may download NLTK data; ensure network access.
-- Some sites block scrapers; if a URL fails, try another source or use PDFs.
+Contributions are welcome!
+Feel free to open issues or submit pull requests.
