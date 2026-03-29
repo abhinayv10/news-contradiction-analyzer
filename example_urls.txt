@@ -1,0 +1,9 @@
+# Example article pair (replace with two live URLs about the SAME financial event)
+#
+# Article A — primary wire or outlet:
+# https://www.reuters.com/markets/
+#
+# Article B — second source on the same story (same company, same quarter/deal):
+# https://www.cnbc.com/
+#
+# Paste these into the Streamlit URL fields after updating to real article links.
